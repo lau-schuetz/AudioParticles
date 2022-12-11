@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/OutdoorsScene.unity
+    guid: 8124e5870f4fd4c779e7a5f994e84ad1
+  - enabled: 1
+    path: Assets/Scenes/MainMenuScene.unity
+    guid: 7dd9f9eba36ef4c47aa35a8ea1c9c637
+  - enabled: 1
+    path: Assets/Scenes/TutorialScene.unity
+    guid: 2ee30e1a8567b417b86297da0a6da942
+  - enabled: 1
+    path: Assets/Scenes/AudioParticles.unity
+    guid: d151a0031f60c4fcba9772842edea627
+  m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: e94738983a3cf6f45a4faa51316548d0,
+      type: 2}

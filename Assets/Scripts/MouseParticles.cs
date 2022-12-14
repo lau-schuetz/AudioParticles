@@ -19,10 +19,5 @@ public class MouseParticles : MonoBehaviour
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         // 10 meters in front of the camera:
         transform.position = ray.GetPoint(10);
-
-        // makes the particle system follow the position of the cursor
-        //var ray_2 = canvasCamera.ScreenPointToRay(Input.mousePosition);
-        // 10 meters in front of the camera:
-        //transform.position = ray_2.GetPoint(10);
     }
 }

@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.SceneManagement;
+using UnityEngine.VFX;
 
 
 [RequireComponent(typeof(ParticleSystem))]
@@ -13,9 +15,10 @@ public class AudioParticles : MonoBehaviour
     ParticleSystem.ColorOverLifetimeModule colorModule;
     ParticleSystem.ShapeModule shapeModule;
 
-    Gradient ourGradientMin;
-    Gradient ourGradientMax;
-
+    public Scene tutorialScene;
+    Scene currentScene;
+    
+    public VisualEffect VFX;
     public Camera cam;
     public GameObject brushTip;
     private Renderer rend;
@@ -41,70 +44,27 @@ public class AudioParticles : MonoBehaviour
 
     bool erase = false;
 
-    // --------- AUDIO -------------
-    // float sync
-    // private ChuckFloatSyncer ck_tempo;
-    public Toggle toggle;
-
     // Start is called before the first frame update
     void Start()
     {
-        // Get the system and the emission module.
+        // get the particle system and the main, color and shape module
         ps = GetComponent<ParticleSystem>();
+        var main = ps.main;
         colorModule = ps.colorOverLifetime;
         shapeModule = ps.shape;
 
-        var main = ps.main;
-
+        // get sphere at cursor and current scene
         rend = brushTip.GetComponent<Renderer>();
-
-        //main.startDelay = 1.0f;
-        //main.startLifetime = 8.0f;
-        //sizeModule = ps.colorOverLifetime;
-        /*
-        // A simple 2 color gradient with a fixed alpha of 1.0f.
-        float alpha1 = 1.0f;
-        ourGradientMin = new Gradient();
-        ourGradientMin.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(Color.green, 0.0f), new GradientColorKey(Color.red, 1.0f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(alpha1, 0.0f), new GradientAlphaKey(alpha1, 1.0f) }
-        );
-
-        // A simple 2 color gradient with a fixed alpha of 0.0f.
-        float alpha2 = 0.0f;
-        ourGradientMax = new Gradient();
-        ourGradientMax.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(Color.green, 0.0f), new GradientColorKey(Color.red, 1.0f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(alpha2, 0.0f), new GradientAlphaKey(alpha2, 1.0f) }
-        );
-
-        // Apply the gradients.
-        colorModule.color = new ParticleSystem.MinMaxGradient(ourGradientMin, ourGradientMax);
-
-        // In 5 seconds we will modify the gradient.
-        Invoke("ModifyGradient", 5.0f);
-        */
+        currentScene = SceneManager.GetActiveScene();
     }
-
-    // initialize audio
-    void InitAudio()
-    {
-        // run the sequencer
-        //GetComponent<ChuckSubInstance>().RunFile("Trial_tempo.ck", true);
-
-        // add the float sync
-        //ck_tempo = gameObject.AddComponent<ChuckFloatSyncer>();
-        //ck_tempo.SyncFloat(GetComponent<ChuckSubInstance>(), "ck_tempo");
-    }
-
-
 
     // Update is called once per frame
     void Update()
     {
-        // --------- change particle emission with waveform / volume ---------------
+        // --------- change particle emission with waveform / volume --------------- //
+        
         // local reference to the time domain waveform
-        float[] wf = ChunityAudioInput.the_waveform;;
+        float[] wf = ChunityAudioInput.the_waveform;
         float max_wf = Mathf.Max(wf);
         float scaled_max_wf = SCALE_WF * max_wf;
 
@@ -114,77 +74,22 @@ public class AudioParticles : MonoBehaviour
         if (scaled_max_wf < 5.0f)
         {
             main.startLifetime = scaled_max_wf;
-            Debug.Log("waveform max: " +  max_wf);
-            Debug.Log("scaled max: " +  scaled_max_wf);
         }
         else
         {
             main.startLifetime = 5.0f;
         }
 
-        /*       
-        // --------- change particle spread with waveform ---------------
-        float scaled_max_wf_spread = Mathf.Pow(max_wf * 11f, 10f);
-
-        shapeModule.radius = scaled_max_wf_spread;
-        Debug.Log("scaled max: " +  scaled_max_wf_spread);
-        */
-
-        // --------- change color with spectrum max ---------------
-        /*
-        // local reference to the audio input spectrum
-        float[] sp = ChunityAudioInput.the_spectrum;
-        // reference to particle system main
-        var main = ps.main;
-        // get max value of spectrum array
-        float max_sp = Mathf.Max(sp);
-        Debug.Log("spectrum max: " +  max_sp);
-
-        if (timeLeft <= Time.deltaTime)
-        {
-            // transition complete
-            // assign the target color
-            if (erase == false)
-            {
-                main.startColor = targetColor;
-            }
-        
-            // start a new transition
-            float scaled_max_sp = SCALE_SP * max_sp;
-            Debug.Log("scaled spectrum max: " +  scaled_max_sp);
-            // map float value to color spectrum red to violet
-            getColor(scaled_max_sp, 1.0f);
-            Debug.Log("r: " + r);
-            // set color of particle system depending on spectrum max, freq max
-            targetColor = new Color(r, g, b);
-            timeLeft = 0.5f;
-        }
-        else
-        {
-            // transition in progress
-            // calculate interpolated color
-            //colorModule.color = new ParticleSystem.MinMaxGradient(curColor, targetColor);
-            if (erase == false)
-            {
-                main.startColor = Color.Lerp(main.startColor.color, targetColor, Time.deltaTime / timeLeft);
-            }
-            // update the timer
-            timeLeft -= Time.deltaTime;
-        }
-        */
-
-        // --------- change color with index of spectrum max ---------------
+        // -------------- change color with index of spectrum max ---------------- //
         
         // local reference to the audio input spectrum
         float[] sp = ChunityAudioInput.the_spectrum;
 
-        // reference to particle system main
-        //var main = ps.main;
         // get max value of spectrum array
         float max_sp = Mathf.Max(sp);
+
         // get index of max value
         float index = System.Array.IndexOf(sp, max_sp);
-        Debug.Log("index: " +  index);
 
         if (timeLeft <= Time.deltaTime)
         {
@@ -196,13 +101,24 @@ public class AudioParticles : MonoBehaviour
             }
 
             // map index of highest frequency to a vale between 0 and 1
-            // index between 0 and 30 sound pleasant
             // start a new transition
             float scaled_max_sp = ((index - 3) / 8.0f);
-            Debug.Log("scaled spectrum max: " +  scaled_max_sp);
+
             // map float value to color spectrum red to violet
-            getColor(scaled_max_sp, 1.0f);
-            Debug.Log("r: " + r);
+            // if scaled value less than 0 or greater 1, color is black -> clamp
+            if (scaled_max_sp < 0.0f)
+            {
+                getColor(0.0f, 1.0f);
+            }
+            else if (scaled_max_sp > 1.0f)
+            {
+                getColor(1.0f, 1.0f);
+            }
+            else
+            {
+                getColor(scaled_max_sp, 1.0f);
+            }
+
             // set color of particle system depending on spectrum max, freq max
             targetColor = new Color(r, g, b);
             timeLeft = 0.5f;
@@ -211,7 +127,6 @@ public class AudioParticles : MonoBehaviour
         {
             // transition in progress
             // calculate interpolated color
-            //colorModule.color = new ParticleSystem.MinMaxGradient(curColor, targetColor);
             if (erase == false)
             {
                 main.startColor = Color.Lerp(main.startColor.color, targetColor, Time.deltaTime / timeLeft);
@@ -220,30 +135,8 @@ public class AudioParticles : MonoBehaviour
             timeLeft -= Time.deltaTime;
         }
         
+        // --------------- change audio beat / tempo with input from Unity -------------- //
 
-        /*
-        // local refernce to the spectrum
-        float[] sp = ChunityAudioInput.the_spectrum;
-        // get max value of spectrum array
-        float max_sp = Mathf.Max(sp);
-        Debug.Log("spectrum max: " +  max_sp);
-        float scaled_max_sp = SCALE_SP * max_sp;
-        Debug.Log("scaled spectrum max: " +  scaled_max_sp);
-        getColor(scaled_max_sp, 1.0f);
-
-        // set color of particle system depending on spectrum max, freq max
-        var main = ps.main;
-        main.startColor = new Color(r, g, b);
-        // spectrum_history[row, col].GetComponent<Renderer>().material.SetColor("_BaseColor", colors[col]);
-        */
-
-        // --------- change radius with spectrum ---------------
-        // float new_radius = SCALE_SP_RAD * max_sp; <----- works well! but little change
-        //float new_radius = Mathf.Pow((SCALE_SP_RAD * Mathf.Sqrt(max_sp * 20f)), 2f);
-        //shapeModule.radius = new_radius;
-        //Debug.Log("new radius: " + new_radius);
-
-        // --------- change audio tempo with input from Unity ---------------
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {   
             GetComponent<ChuckSubInstance>().BroadcastEvent("changeTempoUp");
@@ -253,7 +146,8 @@ public class AudioParticles : MonoBehaviour
             GetComponent<ChuckSubInstance>().BroadcastEvent("changeTempoDown");
         }
 
-        // --------- change audio volume / gain with input from Unity ---------------
+        // ---------------- change audio gain with input from Unity ------------------- //
+       
         if (Input.GetKeyDown(KeyCode.W))
         {   
             GetComponent<ChuckSubInstance>().BroadcastEvent("changeGainUp");
@@ -265,7 +159,8 @@ public class AudioParticles : MonoBehaviour
             shapeModule.radius -= 0.15f;
         }
 
-        // --------- change audio frequency with input from Unity ---------------
+        // --------- change audio frequency with input from Unity --------------- //
+        
         // scale base frequency betqeen 45 and 71, start at 55
         if (Input.GetKeyDown(KeyCode.D))
         {   
@@ -293,20 +188,32 @@ public class AudioParticles : MonoBehaviour
             }
         }
 
+        //------------------------ pause mode -------------------------//
+
         // change between flow and canvas  mode
         if(Input.GetKeyDown(KeyCode.C))
         {
             // change to static canvas mode
             if (cam.GetComponent<HDAdditionalCameraData>().clearColorMode == HDAdditionalCameraData.ClearColorMode.Color)
             {
+                // if in tutorial scene, disable particle system
+                if(currentScene.name == "TutorialScene")
+                {
+                    VFX.Reinit();
+                    VFX.Stop();
+                }
                 cam.GetComponent<HDAdditionalCameraData>().clearColorMode = HDAdditionalCameraData.ClearColorMode.None;
-                // change the music to slow mode
+                // change audioc to slow mode
                 GetComponent<ChuckSubInstance>().BroadcastEvent("dreamOn");
-
             }
             // switch back to flow mode
-            else if (cam.GetComponent<HDAdditionalCameraData>().clearColorMode == HDAdditionalCameraData.ClearColorMode.None)
+            else if(cam.GetComponent<HDAdditionalCameraData>().clearColorMode == HDAdditionalCameraData.ClearColorMode.None)
             {
+                // re-enable visual effect of particles
+                if(currentScene.name == "TutorialScene")
+                {
+                    VFX.Play();
+                }
                 cam.GetComponent<HDAdditionalCameraData>().clearColorMode = HDAdditionalCameraData.ClearColorMode.Color;
                 cam.GetComponent<HDAdditionalCameraData>().backgroundColorHDR = Color.black;
                 erase = false;
@@ -314,21 +221,9 @@ public class AudioParticles : MonoBehaviour
                 GetComponent<ChuckSubInstance>().BroadcastEvent("dreamOff");
             }
         }
-
     }
 
-     void ModifyGradient()
-    {
-        // Reduce the alpha
-        float alpha = 0.5f;
-        ourGradientMin.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(Color.green, 0.0f), new GradientColorKey(Color.red, 1.0f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(alpha, 0.0f), new GradientAlphaKey(alpha, 1.0f) }
-        );
-
-        // Apply the changed gradients.
-        colorModule.color = new ParticleSystem.MinMaxGradient(ourGradientMin, ourGradientMax);
-    }
+    // ----------------- color mapping helper function ---------------------- //
 
     // map spectrum max value to color spectrum from red to violet
     void getColor(float cur_value, float max_value)

@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/AudioParticles.unity
     guid: d151a0031f60c4fcba9772842edea627
+  - enabled: 1
+    path: Assets/Scenes/SecretScene.unity
+    guid: bbf0e6860af844355bfc0d71ff452c6d
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: e94738983a3cf6f45a4faa51316548d0,
       type: 2}

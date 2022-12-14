@@ -17,6 +17,7 @@ public class ChunityRunCode : MonoBehaviour
     {
         // get the chuck subinstance on the object this script is attached to
         chuck = GetComponent<ChuckSubInstance>();
+
         // run code
         runMic();
     }
@@ -32,7 +33,13 @@ public class ChunityRunCode : MonoBehaviour
     void runFile()
     {
         // chuck.RunFile("PaintSound.ck", true);
-        chuck.RunFile("Trial_tempo.ck", true);
+        chuck.RunFile("AudioPaint.ck", true);
+    }
+
+    void runFileSecret()
+    {
+        // chuck.RunFile("PaintSound.ck", true);
+        chuck.RunFile("AudioSecretMode.ck", true);
     }
 
     // Update is called once per frame
@@ -41,13 +48,19 @@ public class ChunityRunCode : MonoBehaviour
         // enable chuck file input
         if(Input.GetKeyDown(KeyCode.N))
         {
-            runFile(); 
+            runFile();
         }
 
         // enable microphone input
         if(Input.GetKeyDown(KeyCode.M))
         {
+            chuck.RunFile("AudioPaint.ck", false);
             runMic();   
+        }
+
+        if(Input.GetKeyDown(KeyCode.B))
+        {
+            runFileSecret();
         }
     }
 }

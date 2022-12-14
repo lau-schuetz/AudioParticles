@@ -20,12 +20,12 @@ Y - switch between paint brush and eraser
 X - change into Contemplative Mode  
 B - start playing calm audio  
 
-Reference-style: 
+
 ![alt text][img1]
 ![alt text][img2]
 
-[img1]: https://github.com/lau-schuetz/AudioParticles/Images/ephemeralMode
-[img2]: https://github.com/lau-schuetz/AudioParticles/Images/secretMode2
+[img2]: https://github.com/lau-schuetz/AudioParticles/blob/main/Images/ephemeralMode.png
+[img1]: https://github.com/lau-schuetz/AudioParticles/blob/main/Images/secretMode2.png
 
 # Ressources
 Tutorials:  
